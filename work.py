@@ -10,15 +10,15 @@ dlay = 1			#delay between mouse and keyboard actions in seconds
 SaveName = "result.txt"	#Saved File Name
 
 #2D variable locations
-mnloc = ([1011,253])	#Notes loc to paste material id
-mnback = ([343,67])
-mdrun = ([1097,403]) #Distributor loc to paste material id
+mnloc = ([807,200])	#Notes loc to paste material id
+mnback = ([274,50])
+mdrun = ([874,317]) #Distributor loc to paste material id
 nsdrag = ([213,407])	#note drag start loc
 nedrag = ([1779,949])	#note drag end loc
-dsdrag = ([237,421])	#distributor drag start loc
-dedrag = ([1159,963])	#distributor drag end loc
-mdback = ([277,371])
-mdtc = ([917,509])
+dsdrag = ([178,321])	#distributor drag start loc
+dedrag = ([928,770])	#distributor drag end loc
+mdback = ([230,290])
+mdtc = ([771,405])
 
 #VARIABLES YOU SHOULD NOT CHANGE!!!!!!!!!!!!!!
 cb = Tk()	#cb variable using tkinter to manipulate clipboard contents for copy and paste
@@ -98,7 +98,33 @@ def tclick(loc):
 	sleep(0.05)
 	user32.keybd_event(0x08, 0, 2, 0) #Backspace press	
 	
-	
+def shiftsel():
+	user32.keybd_event(0x10, 0, 0, 0) #shift
+	sleep(0.05)
+	user32.keybd_event(0x23, 0, 0, 0) #end
+	sleep(0.05)
+	user32.keybd_event(0x23, 0, 2, 0)
+	sleep(0.05)
+	for i in range(0,10):
+		user32.keybd_event(0x28, 0, 0, 0) #down key
+		sleep(0.05)
+		user32.keybd_event(0x28, 0, 2, 0)
+		sleep(0.05)
+	user32.keybd_event(0x10, 0, 2, 0) 	
+	sleep(0.05)
+	user32.keybd_event(0x11, 0, 0, 0) #Ctrl
+	sleep(0.05)	
+	user32.keybd_event(0x43, 0, 0, 0) #c
+	sleep(0.05)
+	user32.keybd_event(0x11, 0, 2, 0) #~Ctrl
+	sleep(0.05)
+	cb.update()	#update the clipboard
+	try:													#try to get the data on the clipboard, if there was nothing to copy this will fail and move to the except block
+		result = cb.selection_get(selection = "CLIPBOARD")	#if successful result will not be None and this will break the loop
+	except:													#If the above code failed check if the number of attempts (aka count) is sufficient and if so set result to a space to break the loop
+		if count > 2:
+			result = " "
+	return result	#return the data in result
 	
 #Alt Tab to working window
 def alttab():
@@ -159,13 +185,10 @@ if __name__ == "__main__":
 			click(mnloc)
 
 			
-			note = mousecopy(nsdrag,nedrag)	#drag select with mouse for notes data to copy
+			note = shiftsel()	#drag select with mouse for notes data to copy
 			result.write(note + "\t\t")	#write the copied notes data to the new file
 			click(mnback)
 			
-			user32.keybd_event(0x08, 0, 0, 0) #Backspace press
-			sleep(0.05)
-			user32.keybd_event(0x08, 0, 2, 0) #Backspace press
 			
 			alttab()	#Swap to the distributor window
 			
@@ -176,6 +199,7 @@ if __name__ == "__main__":
 			
 			note = mousecopy(dsdrag,dedrag)	#drag select with mouse for distributor data to copy
 			result.write(note + "\n")	#write the copied distributor data to the new file
+			click(mdback)
 			tclick(mdtc)
 			
 			alttab()	#Swap to the notes window
